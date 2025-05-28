@@ -175,33 +175,58 @@ def show_agentic_mode_dialog(parent=None):
     return result == QDialog.Accepted
 
 def highlight_vmodel_buttons(main_window, highlight=True):
-    """Highlight the Unit Design, Code and Unit Test buttons in the V-model"""
-    # Find buttons by index in the V-model
-    indices = [3, 4, 5]  # Unit Design, Code, Unit Test (0-based index)
+    """Highlight the Unit Design, Code, and Unit Test buttons in the V-model"""
+    # Indices for Unit Design, Code, Unit Test buttons
+    indices = [3, 4, 5]  # 0-based index
     
     for idx, button in enumerate(main_window.v_buttons):
         if idx in indices:
             if highlight:
+                # Apply green styling for highlighted buttons
                 button.is_active = True
                 button.setChecked(True)
+                button.setStyleSheet("""
+                    QPushButton {
+                        background-color: #43a047; /* Green background */
+                        color: white;
+                        border-radius: 6px;
+                        padding: 6px 12px;
+                        font-weight: bold;
+                    }
+                    QPushButton:hover {
+                        background-color: #388e3c; /* Darker green on hover */
+                    }
+                """)
             else:
+                # Reset styling for unhighlighted buttons
                 button.is_active = False
                 button.setChecked(False)
-            button.update()
+                button.setStyleSheet("""
+                    QPushButton {
+                        background-color: #e0e0e0; /* Grey background */
+                        color: black;
+                        border-radius: 6px;
+                        padding: 6px 12px;
+                        font-weight: bold;
+                    }
+                    QPushButton:hover {
+                        background-color: #bdbdbd; /* Darker grey on hover */
+                    }
+                """)
         else:
-            # Set other buttons to grey color
+            # Apply default grey styling to other buttons
             button.is_active = False
             button.setChecked(False)
             button.setStyleSheet("""
                 QPushButton {
-                    background-color: #e0e0e0;
+                    background-color: #e0e0e0; /* Grey background */
                     color: black;
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 4px;
+                    border-radius: 6px;
+                    padding: 6px 12px;
+                    font-weight: bold;
                 }
                 QPushButton:hover {
-                    background-color: #bdbdbd;
+                    background-color: #bdbdbd; /* Darker grey on hover */
                 }
             """)
-            button.update()
+        button.update()

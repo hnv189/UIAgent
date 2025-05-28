@@ -213,9 +213,9 @@ class VModelFrame(QFrame):
         
         print(f"V-model button clicked: {button.text()}, Tools: {self.tool_count}")
     
-    def toggle_grid_visibility(self):
-        """Toggle grid visibility for debugging"""
-        self.grid_visible = not self.grid_visible
-        for row in self.grid_labels:
-            for label in row:
-                label.setVisible(self.grid_visible)
+    # def toggle_grid_visibility(self):
+    #     """Toggle grid visibility for debugging"""
+    #     self.grid_visible = not self.grid_visible
+    #     for row in self.grid_labels:
+    #         for label in row:
+    #             label.setVisible(self.grid_visible)

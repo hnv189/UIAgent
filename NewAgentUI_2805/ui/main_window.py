@@ -21,7 +21,6 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Agentic Development Assistant")
         self.resize(900, 600)
-        self.tool_count = 0
         
         # Set up UI components
         self.setup_palette()
@@ -81,7 +80,7 @@ class MainWindow(QMainWindow):
         # Create V-model frame
         self.v_model_frame = VModelFrame()
         self.v_model_frame.tool_count_changed.connect(self.update_tool_count)
-        
+
         # Connect mode buttons
         self.v_model_frame.agentic_mode_btn.clicked.connect(self.toggle_agentic_mode)
         self.v_model_frame.manual_mode_btn.clicked.connect(self.toggle_manual_mode)
@@ -109,11 +108,11 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(start_btn, alignment=Qt.AlignCenter)
         
         # Create debug grid switch
-        grid_switch = QCheckBox("Show Grid")
-        grid_switch.setChecked(False)
-        grid_switch.setStyleSheet("margin-left: 12px;")
-        grid_switch.stateChanged.connect(self.v_model_frame.toggle_grid_visibility)
-        main_layout.addWidget(grid_switch, alignment=Qt.AlignLeft)
+        # grid_switch = QCheckBox("Show Grid")
+        # grid_switch.setChecked(False)
+        # grid_switch.setStyleSheet("margin-left: 12px;")
+        # grid_switch.stateChanged.connect(self.v_model_frame.toggle_grid_visibility)
+        # main_layout.addWidget(grid_switch, alignment=Qt.AlignLeft)
         
         # Add chat panel
         self.chat_panel = ChatPanel()
@@ -206,22 +205,33 @@ class MainWindow(QMainWindow):
     
     def toggle_agentic_mode(self):
         """Toggle agentic mode"""
-        if self.sender().isChecked():
+        sender = self.sender()
+        if sender.isChecked():
             if agentMode.show_agentic_mode_dialog(self):
                 # User confirmed, highlight the buttons
-                agentMode.highlight_vmodel_buttons(self, True)
+                agentMode.highlight_vmodel_buttons(self.v_model_frame, True)
                 # Uncheck manual mode
                 self.v_model_frame.manual_mode_btn.setChecked(False)
+                self.v_model_frame.tool_count = 3  # Ensure tool_count is updated
+                self.update_tool_count(self.v_model_frame.tool_count)  # Update tool count in the UI
+                self.v_model_frame.tool_counter_label.setText(f"Tools Selected: {self.v_model_frame.tool_count}")
             else:
                 # User canceled, revert the button state
-                self.sender().setChecked(False)
+                sender.setChecked(False)
+        else:
+            # Uncheck manual mode if agentic mode is turned off
+            self.v_model_frame.manual_mode_btn.setChecked(False)
+            agentMode.highlight_vmodel_buttons(self.v_model_frame, False)
+            self.v_model_frame.tool_count = 0  # Reset tool_count
+            self.update_tool_count(self.v_model_frame.tool_count)  # Update tool count in the UI
+            self.v_model_frame.tool_counter_label.setText(f"Tools Selected: {self.v_model_frame.tool_count}")
+
     
     def toggle_manual_mode(self):
         """Toggle manual mode"""
         if self.sender().isChecked():
-            # Turn off agentic mode and unhighlight buttons
-            agentMode.highlight_vmodel_buttons(self, False)
-            # Uncheck agentic mode
+            QMessageBox.information(self, "Manual Mode", "Please select at least 1 tool for the workflow and press START button.")
+            agentMode.highlight_vmodel_buttons(self.v_model_frame, False)
             self.v_model_frame.agentic_mode_btn.setChecked(False)
     
     def open_workspace(self):

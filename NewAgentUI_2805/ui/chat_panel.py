@@ -1,6 +1,7 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTextEdit, QLineEdit
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTextEdit, QLineEdit, QSplitter, QSizePolicy
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
+from tools.chatbot.openai_client import OpenAIClient
 
 class ChatPanel(QWidget):
     """Chat interface panel"""
@@ -37,10 +38,12 @@ class ChatPanel(QWidget):
         chat_header.addWidget(minimize_btn)
         layout.addLayout(chat_header)
 
+        # Create a splitter for chat display and input
+        splitter = QSplitter(Qt.Vertical)
+        
         # Chat display area
         self.chat_display = QTextEdit()
         self.chat_display.setReadOnly(True)
-        self.chat_display.setFixedHeight(80)
         self.chat_display.setStyleSheet("""
             QTextEdit {
                 background: #f7f9fa;
@@ -50,15 +53,17 @@ class ChatPanel(QWidget):
                 font-size: 11pt;
             }
         """)
-        layout.addWidget(self.chat_display)
+        splitter.addWidget(self.chat_display)
         
         # Input area with text field and send button
-        input_row = QHBoxLayout()
-        self.chat_input = QLineEdit()
+        input_widget = QWidget()
+        input_layout = QHBoxLayout(input_widget)
+        input_layout.setContentsMargins(0, 0, 0, 0)
+        
+        self.chat_input = QTextEdit()  # Change QLineEdit to QTextEdit for dynamic resizing
         self.chat_input.setPlaceholderText("What would you like to do today? Choose a mode or a tool to get started.")
-        self.chat_input.setMinimumHeight(36)
         self.chat_input.setStyleSheet("""
-            QLineEdit {
+            QTextEdit {
                 border: 1px solid #4fc3f7;
                 border-radius: 6px;
                 padding: 6px 12px;
@@ -67,9 +72,10 @@ class ChatPanel(QWidget):
                 font-size: 11pt;
             }
         """)
+        self.chat_input.setMinimumHeight(36)  # Set minimum height for consistency
+        self.chat_input.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  # Allow dynamic resizing
         
         send_btn = QPushButton("Send")
-        send_btn.setMinimumHeight(36)
         send_btn.setStyleSheet("""
             QPushButton {
                 background: #4fc3f7;
@@ -82,12 +88,14 @@ class ChatPanel(QWidget):
                 background: #039be5;
             }
         """)
+        send_btn.setMinimumHeight(36)  # Match the height of chat_input
         send_btn.clicked.connect(self.send_chat_message)
-        self.chat_input.returnPressed.connect(lambda: send_btn.click())
 
-        input_row.addWidget(self.chat_input)
-        input_row.addWidget(send_btn)
-        layout.addLayout(input_row)
+        input_layout.addWidget(self.chat_input)
+        input_layout.addWidget(send_btn)
+        splitter.addWidget(input_widget)
+        
+        layout.addWidget(splitter)
 
         # Add widgets to list for visibility toggling
         self.chat_widgets = [self.chat_display, self.chat_input, send_btn]
@@ -101,7 +109,9 @@ class ChatPanel(QWidget):
     
     def send_chat_message(self):
         msg = self.chat_input.text().strip()
+        chatbot = OpenAIClient() 
         if msg:
-            self.chat_display.append(f"<b>You:</b> {msg}")
+            response = chatbot.send_message(msg)
+            self.chat_display.append(f"<b>You:</b> {response}")
             self.chat_input.clear()
             # Here you would connect to backend processing
